@@ -27,6 +27,8 @@ button:focus-visible,label:focus-within{outline:2px solid var(--accent);outline-
 .opt{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);background:var(--card);padding:12px 14px;margin:8px 0;cursor:pointer}
 .opt input{margin-top:4px}
 .opt.sel{border-color:var(--accent)}
+.opt.idk{border-style:dashed;background:transparent;color:var(--muted);margin-top:16px}
+.opt.idk.sel{color:var(--fg)}
 .guess{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:14px;color:var(--muted);cursor:pointer}
 table{border-collapse:collapse;width:100%;font-size:14px}
 td,th{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
@@ -64,7 +66,6 @@ footer{margin-top:48px}
   <label class="guess"><input type="checkbox" id="guess"> I am guessing</label>
   <div class="row">
     <button id="next" disabled>Next</button>
-    <button id="idk" class="ghost">I don't know</button>
   </div>
 </section>
 
@@ -156,7 +157,8 @@ function render() {
   $("prog").style.width = (100 * S.i / (S.coreCount + MAX_FOLLOWUPS / 2)) + "%";
   $("qtext").textContent = q.q;
   $("opts").innerHTML = it.order.map((oi, k) =>
-    `<label class="opt"><input type="radio" name="o" value="${oi}"><span>${esc(q.options[oi])}</span></label>`).join("");
+    `<label class="opt"><input type="radio" name="o" value="${oi}"><span>${esc(q.options[oi])}</span></label>`).join("") +
+    `<label class="opt idk"><input type="radio" name="o" value="idk"><span>I don't know</span></label>`;
   $("guess").checked = false; $("next").disabled = true;
   document.querySelectorAll("#opts input").forEach(r => r.addEventListener("change", () => {
     document.querySelectorAll(".opt").forEach(l => l.classList.toggle("sel", l.querySelector("input").checked));
@@ -243,8 +245,7 @@ function showHistory() {
 }
 
 $("start").onclick = () => { newSession(); $("intro").classList.add("hidden"); $("quiz").classList.remove("hidden"); render(); };
-$("next").onclick = () => { const r = document.querySelector("#opts input:checked"); if (r) answer(+r.value); };
-$("idk").onclick = () => answer(null);
+$("next").onclick = () => { const r = document.querySelector("#opts input:checked"); if (r) answer(r.value === "idk" ? null : +r.value); };
 $("again").onclick = () => { $("result").classList.add("hidden"); $("intro").classList.remove("hidden"); showHistory(); window.scrollTo(0, 0); };
 $("dl").onclick = () => {
   const blob = new Blob([JSON.stringify(S.result, null, 1)], { type: "application/json" });
